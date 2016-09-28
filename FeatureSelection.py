@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 """
 @author: NL
@@ -10,8 +11,8 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
 from sklearn import tree
 
-from sklearn.decomposition import PCA
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
 
 def dataCols():
     columnNames = ['B1H','B1D','B1A','B2H','B2D','B2A','B3H','B3D',\
@@ -132,46 +133,20 @@ def main():
     y = np.asarray(target, dtype="int64")
   
   
-    cols = ['BbMxAHA', 'BbMx<2.5']
+    cols = ['BbMxH','BbMxD','BbAvH','BbMxAHA', 'BbMx<2.5']
     combo1 = specifyFrame(newFrame, cols)    
     X = combo1.as_matrix()
+    print(X.shape)
+    """ 
     mean = X.mean(axis=0)
     std = X.std(axis=0)
     X = (X-mean)/std
+    """
 
-    pca = PCA(n_components=2)  
-    X_r = pca.fit(X, y).transform(X)
+    X_new = SelectKBest(chi2, k=2).fit_transform(X,y)
+    print(X_new.shape)
+    print(X_new[:5])
     
-    lda = LinearDiscriminantAnalysis(n_components=2)
-    X_r2 = lda.fit(X, y).transform(X)
-    
-    print('explained variance ratio (first two components): %s'
-      % str(pca.explained_variance_ratio_))
-      
-    
-    plt.figure()
-    
-    for c, i, target_name in zip("yrb", [0, 1, 2], target_names):
-        plt.scatter(X_r[y == i, 0], X_r[y == i, 1], c=c, label=target_name)
-    plt.legend()
-    plt.title('PCA Analysis using {x} & {y} for EPL2005-2006'.format(x=cols[0], y=cols[1]))
-
-    plt.figure()
-    for c, i, target_name in zip("yrb", [0, 1, 2], target_names):
-        plt.scatter(X_r2[y == i, 0], X_r2[y == i, 1], c=c, label=target_name)
-    plt.legend()
-    
-    plt.xlabel(cols[0])
-    plt.ylabel(cols[1])
-
-    plt.legend()
-    plt.suptitle("LDA Analysis using {x} & {y} for EPL2005-2006".format(x=cols[0], y=cols[1]))
-    plt.show()
-    
-
-    decisionTreeAndPlot(X_r2, y, cols)
-        
-    
-    
+    decisionTreeAndPlot(X_new, y, cols)
 main()
 
